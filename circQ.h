@@ -18,16 +18,19 @@ public:
 		reset();
 	}
 
+	// number of bytes to READ from the queue
 	unsigned available()
 	{
 		return availBytes;
 	}
 
+	// it's buffer size maximum
 	int size()
 	{
 		return _CIRCQSIZE;
 	}
 
+	// size-avail = room
 	int space()
 	{
 		return _CIRCQSIZE - available();
@@ -53,20 +56,24 @@ public:
 		availBytes = availBytesState;
 	}
 
+	byte peek(unsigned offset)
+	{
+		// up to the caller to check available
+		// otherwise this will give you stale
 
+		// bit arithmatic should handle wrap
+		return m_data[readCursor + offset];
+	}
 
 	byte read()
 	{
 		byte ret = -1;
 
+		if (availBytes)
 		{
-			if (readCursor != writeCursor)
-			{
-				// 
-				availBytes--;
-				ret = m_data[readCursor++];
-			}
-
+			// 
+			availBytes--;
+			ret = m_data[readCursor++];
 		}
 
 		return ret;
