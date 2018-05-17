@@ -1,15 +1,21 @@
+#include <inttypes.h>
 
-template <int _CIRCQSIZE, int _CIRQSIZEBITS>
+
+
+template <int _CIRCQSIZE, int _CIRQSIZEBITS, typename STORED=unsigned char, typename COUNTERS=unsigned char>
 class circQueueT
 {
 
 protected:
 
-	byte m_data[_CIRCQSIZE];
+	typedef STORED qStorageType;
+	typedef COUNTERS qCounterType;
+
+	qStorageType m_data[_CIRCQSIZE];
 	// let the compiler do the work
-	volatile byte readCursor : _CIRQSIZEBITS, writeCursor : _CIRQSIZEBITS;
-	volatile byte readCursorState : _CIRQSIZEBITS, writeCursorState : _CIRQSIZEBITS;
-	volatile byte availBytes, availBytesState;
+	volatile qCounterType readCursor : _CIRQSIZEBITS, writeCursor : _CIRQSIZEBITS;
+	volatile qCounterType readCursorState : _CIRQSIZEBITS, writeCursorState : _CIRQSIZEBITS;
+	volatile qCounterType availBytes, availBytesState;
 
 public:
 
@@ -56,7 +62,7 @@ public:
 		availBytes = availBytesState;
 	}
 
-	byte peek(unsigned offset)
+	qStorageType peek(qCounterType offset)
 	{
 		// up to the caller to check available
 		// otherwise this will give you stale
@@ -65,9 +71,15 @@ public:
 		return m_data[readCursor + offset];
 	}
 
-	byte read()
+	// shorthand for peek
+	qStorageType operator[](qCounterType offset)
 	{
-		byte ret = -1;
+		return peek(offset);
+	}
+
+	qStorageType read()
+	{
+		qStorageType ret = -1;
 
 		if (availBytes)
 		{
@@ -79,7 +91,7 @@ public:
 		return ret;
 	}
 
-	bool write(byte data)
+	bool write(qStorageType data)
 	{
 		bool ret = false;
 
