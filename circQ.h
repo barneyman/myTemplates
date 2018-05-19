@@ -6,6 +6,7 @@ template <int _CIRCQSIZE, int _CIRQSIZEBITS, typename STORED=unsigned char, type
 class circQueueT
 {
 
+
 protected:
 
 	typedef STORED qStorageType;
@@ -42,7 +43,7 @@ public:
 		return _CIRCQSIZE - available();
 	}
 
-	void reset()
+	virtual void reset()
 	{
 		readCursor = writeCursor = availBytes = 0;
 		readCursorState = writeCursorState = availBytesState = 0;
