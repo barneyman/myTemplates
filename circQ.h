@@ -1,7 +1,6 @@
 #include <inttypes.h>
 
 
-
 template <int _CIRCQSIZE, int _CIRQSIZEBITS, typename STORED=unsigned char, typename COUNTERS=unsigned char>
 class circQueueT
 {
@@ -26,19 +25,19 @@ public:
 	}
 
 	// number of bytes to READ from the queue
-	unsigned available()
+	qCounterType available()
 	{
 		return availBytes;
 	}
 
-	// it's buffer size maximum
-	int size()
+	// its buffer size maximum
+	qCounterType size()
 	{
 		return _CIRCQSIZE;
 	}
 
 	// size-avail = room
-	int space()
+	qCounterType space()
 	{
 		return _CIRCQSIZE - available();
 	}
@@ -98,7 +97,7 @@ public:
 
 		{
 			// relying on bits width math
-			if ((readCursor - 1) != writeCursor)
+			if (space())
 			{
 				m_data[writeCursor++] = data;
 				availBytes++;
@@ -108,6 +107,7 @@ public:
 
 		return ret;
 	}
+
 
 };
 
