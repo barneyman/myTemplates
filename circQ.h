@@ -16,10 +16,12 @@ protected:
 	volatile qCounterType readCursor : _CIRQSIZEBITS, writeCursor : _CIRQSIZEBITS;
 	volatile qCounterType readCursorState : _CIRQSIZEBITS, writeCursorState : _CIRQSIZEBITS;
 	volatile qCounterType availBytes, availBytesState;
+	bool m_overWriteWhenFull;
 
 public:
 
-	circQueueT()
+	// if true, the queue will continue at full, overwrite and bump the readcursor - data gets lost
+	circQueueT(bool keepWriting=false):m_overWriteWhenFull(keepWriting)
 	{
 		reset();
 	}
@@ -66,9 +68,9 @@ public:
 	{
 		// up to the caller to check available
 		// otherwise this will give you stale
-
+		
 		// bit arithmatic should handle wrap
-		return m_data[readCursor + offset];
+		return m_data[(readCursor + offset)%_CIRCQSIZE];
 	}
 
 	// shorthand for peek
@@ -95,14 +97,16 @@ public:
 	{
 		bool ret = false;
 
+		// if we overwrite, make space
+		if (m_overWriteWhenFull && !space())
+			read();
+
+		// relying on bits width math
+		if (space())
 		{
-			// relying on bits width math
-			if (space())
-			{
-				m_data[writeCursor++] = data;
-				availBytes++;
-				ret = true;
-			}
+			m_data[writeCursor++] = data;
+			availBytes++;
+			ret = true;
 		}
 
 		return ret;
