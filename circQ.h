@@ -1,7 +1,7 @@
 #include <inttypes.h>
 
 
-template <int _CIRCQSIZE, int _CIRQSIZEBITS, typename STORED=unsigned char, typename COUNTERS=unsigned char>
+template <int _CIRCQSIZE, typename STORED=unsigned char, typename COUNTERS=unsigned char>
 class circQueueT
 {
 
@@ -13,8 +13,8 @@ protected:
 
 	qStorageType m_data[_CIRCQSIZE];
 	// let the compiler do the work
-	volatile qCounterType readCursor : _CIRQSIZEBITS, writeCursor : _CIRQSIZEBITS;
-	volatile qCounterType readCursorState : _CIRQSIZEBITS, writeCursorState : _CIRQSIZEBITS;
+	volatile qCounterType readCursor , writeCursor;
+	volatile qCounterType readCursorState, writeCursorState;
 	volatile qCounterType availBytes, availBytesState;
 	bool m_overWriteWhenFull;
 
@@ -88,6 +88,7 @@ public:
 			// 
 			availBytes--;
 			ret = m_data[readCursor++];
+			readCursor %= _CIRCQSIZE;
 		}
 
 		return ret;
@@ -105,6 +106,7 @@ public:
 		if (space())
 		{
 			m_data[writeCursor++] = data;
+			writeCursor %= _CIRCQSIZE;
 			availBytes++;
 			ret = true;
 		}
