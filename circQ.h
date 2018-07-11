@@ -81,7 +81,7 @@ public:
 
 	qStorageType read()
 	{
-		qStorageType ret = -1;
+		qStorageType ret;
 
 		if (availBytes)
 		{
